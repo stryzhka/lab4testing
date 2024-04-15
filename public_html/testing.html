@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="css/testing.css">
+        <!--<script type="module" src="js/testing.js" defer></script>-->
     </head>
     <body>
         <div class="main">
@@ -16,7 +17,7 @@
                     <div class="hs-wrap">
                         <div class="header">
                             <h1>Тестирование по биологии</h1>
-                            <p>Вопрос 1</p>
+                            <p id="questionNumber">Вопрос 1</p>
                             <p class="header-theme">Что является структурной единицей почки?</p>
                         </div>
                         <div class="settings">
@@ -53,13 +54,13 @@
                     <div class="footer">
                         <div>
                             <div>
-                                <form>
-                                    <button>&#8592</button>
+                                <form onsubmit="return false">
+                                    <button id="prevQuestion">&#8592</button>
                                 </form>
                             </div>
                             <div>
-                                <form>
-                                    <button id="=nextQuestion">&#8594</button>
+                                <form onsubmit="return false">
+                                    <button id="nextQuestion">&#8594</button>
                                 </form>
                             </div>
                         </div>
@@ -70,7 +71,7 @@
                         </div>
                     </div>
                     
-                    <div class="tabs">
+                    <div class="tabs" id="tabs">
                             <div class="tab-unactive"></div>
                             <div class="tab-readed"></div>
                             <div class="tab-answered"></div>
@@ -78,6 +79,8 @@
                             <div class="tab-unactive"></div>
                             <div class="tab-answered"></div>
                             <div class="tab-unactive"></div>
+                            <div class="tab-readed"></div>
+                            <div class="tab-readed"></div>
                             <div class="tab-readed"></div>
                     </div>
                 </div>
