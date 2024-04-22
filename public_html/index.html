@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="css/index.css">
+        <script src="js/index.js" defer></script>
     </head>
     <body>
         <div class="main">
@@ -24,13 +25,13 @@
                             <form>
                                 <div>
                                     <label>
-                                        <input type="checkbox">
+                                        <input id="shuffleQuestions" type="checkbox">
                                         Перемешать вопросы
                                     </label>
                                 </div>
                                 <div>
                                     <label>
-                                        <input type="checkbox">
+                                        <input id="shuffleAnswers" type="checkbox">
                                         Перемешать ответы
                                     </label>
                                 </div>
@@ -39,8 +40,8 @@
                     </div>
                     <div class="footer">
                         <p>Длительность тестирования: 10:00</p>
-                        <form>
-                            <button>Начать тестирование</button>
+                        <form onsubmit="return false">
+                            <button id="start" >Начать тестирование</button>
                         </form>
                     </div>
                 </div>

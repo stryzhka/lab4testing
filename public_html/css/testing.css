@@ -82,3 +82,18 @@ body{
 }
 
 
+.buttons{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 0 auto;
+}
+
+.timer{
+    padding-right: 40px;
+    padding-left: 40px;
+}
+
+.buttons-lr{
+    margin: 0 auto;
+}
