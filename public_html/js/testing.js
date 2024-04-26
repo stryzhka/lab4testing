@@ -10,8 +10,6 @@ let answered = 0;
 let radioCount, checkboxCount, listCount = 0;
 let remainText = document.getElementById("remain");
 
-
-
 const urlParams = new URLSearchParams(window.location.search);
 let timer = urlParams.get('timer');
 console.log(`viewed: ${questions[currentQuestion].viewed}`);
@@ -21,16 +19,19 @@ let shuffleAnswers = urlParams.get('shuffleAnswers');
 
 console.log(shuffleQuestions, shuffleAnswers)
 
-function shuffle(){
-    for (var i = questions.length - 1; i > 0; i--) {
+
+//Перемешивание массива
+function shuffle(arr){
+    for (var i = arr.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
-        var temp = questions[i];
-        questions[i] = questions[j];
-        questions[j] = temp;
+        var temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
     }
     
 }
 
+//Шаг таймера
 function timerStep(){
     
     let convert = new Date(timer * 1000).toISOString().substring(14, 19);
@@ -62,8 +63,11 @@ function renderTabs(){
             tab.setAttribute("class", "tab-answered");
         }
         if (i == currentQuestion){
-           tab.style["boxShadow"] = "0 0 5px #999999";
+           tab.style["boxShadow"] = "0 0 5px #000000";
         }
+        tab.addEventListener('click', function(){
+            jumpTo(i);
+        });
         tabDiv.appendChild(tab);
         
     }
@@ -84,24 +88,21 @@ function renderQuestion(){
         case "radio":
             for (let i = 0; i < questions[currentQuestion].answers.length; i++){
                 htmlAppend = `<div>
-                                    <label>
-                
-                                        <input class="check" id="question${currentQuestion}_checkbox${i}" type="radio" name="1"/>
+                              <label>
+               <input class="check" id="question${currentQuestion}_checkbox${i}" 
+                                            type="radio" name="1"/>
                                         ${questions[currentQuestion].answers[i]}
                                     </label>
                                 </div>`;
-                //var div = document.createElement("div");
-                //var label = div.appendChild(document.createElement("<input>"));
                 questionForm.insertAdjacentHTML('beforeend', htmlAppend);
             }
             break;
-            //console.log(htmlAppend);
         case "checkbox":
             for (let i = 0; i < questions[currentQuestion].answers.length; i++){
                 htmlAppend = `<div>
                                     <label>
-                                        
-                                        <input id="question${currentQuestion}_checkbox${i}" class="check" type="checkbox" name="1"/>
+ <input id="question${currentQuestion}_checkbox${i}"
+ class="check" type="checkbox" name="1"/>
                                         ${questions[currentQuestion].answers[i]}
                                     </label>
                                 </div>`;
@@ -111,7 +112,8 @@ function renderQuestion(){
         case "select":
             let selectAppend = `<select id="select">`;
             for (let i = 0; i < questions[currentQuestion].answers.length; i++){
-                htmlAppend = `<option id="question${currentQuestion}_select${i}" class="checkList">${questions[currentQuestion].answers[i]}</option>`;
+                htmlAppend = `<option id="question${currentQuestion}_select${i}" 
+class="checkList">${questions[currentQuestion].answers[i]}</option>`;
                 selectAppend += htmlAppend;
             }
             selectAppend += "</select>";
@@ -120,7 +122,8 @@ function renderQuestion(){
         case "input":
             htmlAppend = `
                             <div>
-                                <label>Введите ответ<input class="checkInput" id="question${currentQuestion}_input"/></label>
+                                <label>Введите ответ<input class="checkInput" 
+id="question${currentQuestion}_input"/></label>
                             </div
                         `;
             questionForm.insertAdjacentHTML('beforeend', htmlAppend);
@@ -133,9 +136,12 @@ function renderQuestion(){
 
 //Смена вопроса на следующий
 function changeQuestionForward(){
+    answer();
     saveInput();
     if (currentQuestion < questions.length-1)
         currentQuestion++;
+    else
+        currentQuestion = 0;
     renderQuestion();
 
     
@@ -143,6 +149,7 @@ function changeQuestionForward(){
 
 //Смена вопроса на предыдущий
 function changeQuestionBackward(){
+    answer();
     saveInput();
     if (currentQuestion != 0)
         currentQuestion--;
@@ -206,10 +213,11 @@ function answer(){
                 document.querySelectorAll(`.check`).forEach(el => {
                     
                     if (el.checked){
-                        questions[currentQuestion].input = i;
+                        questions[currentQuestion].input = el.parentElement.innerText;
                         if (!questions[currentQuestion].answered)
                             answered++;
                         questions[currentQuestion].answered = true;
+
                     }
                     i++;
                 });
@@ -217,11 +225,15 @@ function answer(){
                 break;
             case "checkbox":
                 i = 0;
+                let str = "";
                 questions[currentQuestion].input = [];
                 document.querySelectorAll(`.check`).forEach(el => {
                     
                     if (el.checked){
-                        questions[currentQuestion].input.push(i);
+                        str = el.parentElement.innerText.toString();
+                        if (str[0] == " ")
+                            str = str.toString().substring(1);
+                        questions[currentQuestion].input.push(str);
                         if (!questions[currentQuestion].answered)
                             answered++;
                         questions[currentQuestion].answered = true;
@@ -240,15 +252,18 @@ function answer(){
                 break;
             case "input":
                 document.querySelectorAll(`.checkInput`).forEach(el => {
-                if (el.value.match(/^[А-ЯЁа-яё]/) != null){
+                if (el.value != ""){
+                    if (el.value.match(/^[а-яА-ЯёЁ]+$/g) != null){
                     questions[currentQuestion].input = el.value;
                     if (!questions[currentQuestion].answered)
                         answered++;
                     questions[currentQuestion].answered = true;
+                    }
+                    else{
+                        alert("Ошибка ввода: только русские буквы");
+                    }
                 }
-                else{
-                    alert("Ошибка ввода: только русские буквы");
-                }
+                
                 
             });
                 break;
@@ -260,49 +275,95 @@ function answer(){
     
 }
 
+//generateResults()
+//Возвращает обьект с результатами
 function generateResults(){
    let obj = [];
    for (let i = 0; i < questions.length; ++i){
        obj[`question${i}_number`] = questions[i].number;
        obj[`question${i}_title`] = questions[i].title;
-       obj[`question${i}_userAnswer`] = questions[i].input;
-       obj[`question${i}_trueAnswer`] = questions[i].trueAnswer;
-       questions[i].input = "" + questions[i].input;
-       questions[i].trueAnswer = "" + questions[i].trueAnswer;
-       if (questions[i].input.toString() === questions[i].trueAnswer.toString())
-            obj[`question${i}_score`] = 1;
-       else
-           obj[`question${i}_score`] = 0;
-   }
+       if (typeof(questions[i].input) == 'object'){
+           questions[i].input = questions[i].input.sort();
+           questions[i].trueAnswer = questions[i].trueAnswer.sort();
+       }
+       try{
+           let str = questions[i].input
+        
+        if (str.toString()[0] == " ")
+            str = str.toString().substring(1);
+        obj[`question${i}_userAnswer`] = str;
+        obj[`question${i}_trueAnswer`] = (questions[i].trueAnswer);
+        //questions[i].input = "" + questions[i].input;
+        //questions[i].trueAnswer = "" + questions[i].trueAnswer;
+        //console.log("STR:", str);
+        if (str == 0){
+            obj[`question${i}_userAnswer`] = "Нет ответа";
+            obj[`question${i}_trueAnswer`] = (questions[i].trueAnswer);
+            obj[`question${i}_score`] = 0;
+            obj["len"] = questions.length;
+            continue;
+        }
+        if (str.toString() === questions[i].trueAnswer.toString()){
+             obj[`question${i}_score`] = 1;
+             //console.log("yes debug: ", str, questions[i].trueAnswer);
+        }
+        else{
+            obj[`question${i}_score`] = 0;
+            console.log(typeof(str), typeof(questions[i].trueAnswer));
+            console.log(`|${str}|${questions[i].trueAnswer}|`);
+        }
+       }
+       catch (TypeError){
+            obj[`question${i}_userAnswer`] = "Нет ответа";
+            obj[`question${i}_trueAnswer`] = (questions[i].trueAnswer);
+            obj[`question${i}_score`] = 0;
+            obj["len"] = questions.length;
+            continue;
+        }
+    }
    obj["len"] = questions.length;
    return obj;
 }
 
-
+//Подтверждение завершения теста
 function confirmFinish(){
     if (confirm("Завершить тест?")){
         finishTest();
     }
 }
 
+//Передать результаты теста на страницу результатов и открыть ее
 function finishTest(){
     let str = Object.entries(generateResults()).map(([key, val]) => `${key}=${val}`).join('&');
-    console.log(str);
+    //console.log(generateResults());
     window.location.href = `http://localhost:8383/lab4/results.html?${str}`;
+}
+
+function jumpTo(number){
+    answer();
+    saveInput();
+    currentQuestion = number;
+    renderQuestion();
 }
 
 forwardButton.onclick = changeQuestionForward;
 prevButton.onclick = changeQuestionBackward;
-answerButton.onclick = answer;
+//answerButton.onclick = answer;
 
 document.getElementById("finishButton").style.visibility = "hidden";
 document.getElementById("finishButton").onclick = confirmFinish;
-if (shuffleQuestions == true)
+
+
+if (shuffleQuestions === "true"){
     shuffle(questions);
-if (shuffleAnswers == true)
-   for (let i = 0; i < questions.length; ++i){
-       shuffle(questions[i].answers);
-   }
+}
+
+if (shuffleAnswers === "true"){
+    questions.forEach (el => {
+       shuffle(el.answers); 
+    });
+}
+
 renderQuestion();
 var interval = window.setInterval(timerStep, 1000);
 
